@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="cinema-view">
+
+  <!-- Hero Spotlight Section -->
+  {% if spotlight %}
+  <section class="hero-banner" id="heroBanner" data-movie-id="{{ spotlight.id }}" data-movie-title="{{ spotlight.title }}">
+    <div class="hero-backdrop" style="background-image: linear-gradient(to right, rgba(11, 15, 25, 0.96) 25%, rgba(11, 15, 25, 0.75) 60%, rgba(11, 15, 25, 0.3) 100%), url('{{ spotlight.backdrop_url or spotlight.poster_url }}');">
+    </div>
+    
+    <div class="hero-content">
+      <div class="hero-tags">
+        <span class="badge-featured">⭐ SPOTLIGHT FEATURE</span>
+        <span class="rating-pill">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#FBBF24" stroke="#FBBF24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          {{ spotlight.vote_average }} TMDB
+        </span>
+        {% if spotlight.release_year %}
+        <span class="year-pill">{{ spotlight.release_year }}</span>
+        {% endif %}
+      </div>
+
+      <h1 class="hero-title">{{ spotlight.title }}</h1>
+
+      <p class="hero-overview">
+        {{ spotlight.overview }}
+      </p>
+
+      <div class="hero-meta">
+        {% if spotlight.director %}
+        <div class="meta-item">
+          <span class="meta-label">DIRECTOR</span>
+          <span class="meta-value">{{ spotlight.director }}</span>
+        </div>
+        {% endif %}
+        {% if spotlight.cast %}
+        <div class="meta-item">
+          <span class="meta-label">STARRING</span>
+          <span class="meta-value">{{ spotlight.cast[:3]|join(', ') }}</span>
+        </div>
+        {% endif %}
+        <div class="meta-item">
+          <span class="meta-label">GENRES</span>
+          <div class="genre-pill-group">
+            {% for g in spotlight.genres %}
+            <span class="genre-tag">{{ g }}</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-actions">
+        <button class="btn btn-primary" onclick="recommendMovie('{{ spotlight.id }}', '{{ spotlight.title|escape }}')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          Recommend Similar Movies
+        </button>
+        <button class="btn btn-secondary" onclick="openMovieModal({{ spotlight.id }})">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          View Full Details
+        </button>
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Active Recommendation Section (Dynamic / Populated via JS) -->
+  <section id="recommendationSection" class="recommendation-section" style="display: none;">
+    <div class="section-header">
+      <div>
+        <div class="section-tag" id="recSectionTag">AI RECOMMENDATION ENGINE</div>
+        <h2 class="section-title" id="recSectionTitle">Because you selected <span class="gradient-text" id="recTargetTitle">Movie</span></h2>
+        <p class="section-subtitle">Ranked by cosine similarity over plot keywords, genres, top cast, and director.</p>
+      </div>
+      <button class="btn btn-ghost" onclick="closeRecommendations()">Close Recommendations &times;</button>
+    </div>
+
+    <!-- Recommendations Carousel / Grid -->
+    <div id="recommendationsGrid" class="cards-grid recs-grid">
+      <!-- Injected via JavaScript -->
+    </div>
+  </section>
+
+  <!-- Genre Filter Navigation Bar -->
+  <section class="genre-nav-section">
+    <div class="genre-nav-header">
+      <h3 class="genre-nav-title">Explore by Genre</h3>
+      <span class="genre-nav-count">{{ genres|length }} categories</span>
+    </div>
+    <div class="genre-chips-container" id="genreChipsContainer">
+      <button class="genre-chip active" data-genre="">All Movies</button>
+      {% for g in genres %}
+      <button class="genre-chip" data-genre="{{ g }}">{{ g }}</button>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Main Movies Grid Section -->
+  <section class="movies-explore-section">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title" id="exploreSectionTitle">Trending & Popular Films</h2>
+        <p class="section-subtitle" id="exploreSectionSubtitle">Top rated films from the TMDB 5000 cinema catalog.</p>
+      </div>
+      <div class="explore-controls">
+        <span id="resultsCountLabel" class="results-count-label">Showing {{ trending|length }} movies</span>
+      </div>
+    </div>
+
+    <div id="moviesGrid" class="cards-grid">
+      {% for movie in trending %}
+      <div class="movie-card" data-movie-id="{{ movie.id }}">
+        <div class="card-poster-wrapper">
+          <img 
+            src="{{ movie.poster_url }}" 
+            alt="{{ movie.title }}" 
+            class="card-poster"
+            loading="lazy"
+          >
+          <div class="card-overlay">
+            <button class="card-action-btn primary" title="Get Recommendations" onclick="recommendMovie({{ movie.id }}, '{{ movie.title|escape }}')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+              </svg>
+              Recommend
+            </button>
+            <button class="card-action-btn secondary" title="View Info" onclick="openMovieModal({{ movie.id }})">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              Info
+            </button>
+          </div>
+          <span class="card-rating">★ {{ movie.vote_average }}</span>
+        </div>
+        <div class="card-info">
+          <h4 class="card-title" title="{{ movie.title }}" onclick="openMovieModal({{ movie.id }})">{{ movie.title }}</h4>
+          <div class="card-meta">
+            <span class="card-year">{{ movie.release_year or 'N/A' }}</span>
+            <span class="card-genre">{{ movie.genres[0] if movie.genres else 'Cinema' }}</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Load More Button -->
+    <div class="load-more-container">
+      <button id="loadMoreBtn" class="btn btn-secondary load-more-btn" onclick="loadMoreMovies()">
+        Load More Movies
+      </button>
+    </div>
+  </section>
+
+</div>
+{% endblock %}

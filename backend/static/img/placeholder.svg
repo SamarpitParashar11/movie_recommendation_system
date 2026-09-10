@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 450" width="300" height="450">
+  <defs>
+    <linearGradient id="pgrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="450" fill="url(#pgrad)"/>
+  <circle cx="150" cy="180" r="48" fill="rgba(99, 102, 241, 0.15)" stroke="#6366F1" stroke-width="2"/>
+  <polygon points="142,166 164,180 142,194" fill="#6366F1"/>
+  <text x="150" y="270" fill="#94A3B8" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="14" font-weight="600" text-anchor="middle">CINEMA POSTER</text>
+  <text x="150" y="295" fill="#64748B" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" text-anchor="middle">TMDB 5000 ARCHIVE</text>
+</svg>

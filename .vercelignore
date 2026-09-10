@@ -1,0 +1,12 @@
+.git
+.gitignore
+.venv
+venv/
+env/
+__pycache__
+*.pyc
+notebook.ipynb
+plan.md
+test_app.py
+*.zip
+backend/pipeline/
